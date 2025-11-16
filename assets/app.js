@@ -61,11 +61,51 @@ function clampRates() {
   }
 }
 
+
+const STORAGE_KEY = "astroCalc_v2_state";
+
+function collectState() {
+  const data = {};
+  document.querySelectorAll("input, select").forEach(el => {
+    if (!el.id) return;
+    if (el.type === "button" || el.type === "submit") return;
+    if (el.readOnly) return;
+    data[el.id] = el.value;
+  });
+  return data;
+}
+
+function saveState() {
+  try {
+    const data = collectState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    // ignore
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.keys(data).forEach(id => {
+      const el = document.getElementById(id);
+      if (el && typeof data[id] === "string") {
+        el.value = data[id];
+      }
+    });
+  } catch (e) {
+    // ignore
+  }
+}
+
 function markDirty() {
       const notes = document.getElementById("statusNotes");
       if (!notes) return;
       notes.innerHTML =
         '<div class="pill"><strong>Atenção:</strong> parâmetros alterados, clica em Calcular para atualizar o resumo.</div>';
+      saveState();
     }
 
     // Armazéns
@@ -587,6 +627,40 @@ const stAstro = document.getElementById("statusAstro");
       updateStorages();
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    
+function resetAll() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  document.querySelectorAll("input").forEach(el => {
+    if (el.type === "button" || el.readOnly) return;
+    el.value = "";
+  });
+  // defaults
+  const rM = document.getElementById("rateM");
+  const rC = document.getElementById("rateC");
+  const rD = document.getElementById("rateD");
+  if (rM) rM.value = "3";
+  if (rC) rC.value = "2";
+  if (rD) rD.value = "1";
+  const ally = document.getElementById("allyClass");
+  if (ally) ally.value = "warrior";
+  const debris = document.getElementById("debrisRate");
+  if (debris) debris.value = "";
+  const fleetBody = document.getElementById("fleetBody");
+  if (fleetBody) fleetBody.innerHTML = "";
+
+  const statusIds = ["statusAstro","statusDebris","statusTotals","statusCapacity","statusTrades","statusPacks","statusNotes"];
+  statusIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = "";
+  });
+
+  updateStorages();
+  updateAstroCost();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+      loadState();
       updateStorages();
+      updateAstroCost();
     });
