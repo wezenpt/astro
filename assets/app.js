@@ -214,6 +214,7 @@ function updateAstroCost() {
 
   markDirty();
 }
+
 /* ===========================
    DESTROÇOS / FROTA
    =========================== */
@@ -358,6 +359,7 @@ function updateFleetStats() {
 
   return { totalPts: Math.round(sumPts), dm: sumDM, dc: sumDC, dd: sumDD };
 }
+
 /* ===========================
    CÁLCULO PRINCIPAL
    =========================== */
@@ -520,7 +522,7 @@ function calcular() {
   }
 
   /* ================================
-     Verificação de capacidade (corrigida)
+     Verificação de capacidade
      ================================ */
  const capContainer = document.getElementById("statusCapacity");
 if (capContainer) {
@@ -556,7 +558,6 @@ if (capContainer) {
     return row;
   }
 
-  // Capacidade
   const lvlM = parseInt(document.getElementById("storLvlM").value) || 0;
   const lvlC = parseInt(document.getElementById("storLvlC").value) || 0;
   const lvlD = parseInt(document.getElementById("storLvlD").value) || 0;
@@ -571,12 +572,10 @@ if (capContainer) {
 
   const dm2 = dm, dc2 = dc, dd2 = dd;
 
-  // Recursos atuais
   if (curM2 > capM) issues.push(capIssue("Armazém de <strong>Metal</strong>", curM2 - capM));
   if (curC2 > capC) issues.push(capIssue("Armazém de <strong>Cristal</strong>", curC2 - capC));
   if (curD2 > capD) issues.push(capIssue("Tanque de <strong>Deutério</strong>", curD2 - capD));
 
-  // Destroços gerados
   if (dm2 > capM) issues.push(capIssue("Armazém de <strong>Metal</strong>", dm2 - capM));
   if (dc2 > capC) issues.push(capIssue("Armazém de <strong>Cristal</strong>", dc2 - capC));
   if (dd2 > capD) issues.push(capIssue("Tanque de <strong>Deutério</strong>", dd2 - capD));
@@ -590,7 +589,6 @@ if (capContainer) {
     issues.forEach(i => capContainer.appendChild(i));
   }
 }
-
 
   /* =========================
      Trocas recomendadas
@@ -751,6 +749,7 @@ if (capContainer) {
 
   updateStorages();
 }
+
 /* ===========================
    RESET
    =========================== */
