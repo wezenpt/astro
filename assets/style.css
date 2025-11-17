@@ -155,7 +155,7 @@ h1 {
   appearance: none;
 }
 
-/* Small input field (used for % destroços) */
+/* Small input field */
 .input-small {
   max-width: 120px;
 }
@@ -403,14 +403,10 @@ body.theme-light .kpi {
   border-radius: 10px;
   background: var(--bg3);
   padding: 10px 10px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solidrgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-body.theme-light .status-block {
-  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .status-block h3 {
