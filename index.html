@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>oGame AstroCalculator v2.0 – Teste Neon/Carbon/Light</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="oGame AstroCalculator v2.0 – cálculo de astrofísica, recursos, frota, trocas, armazéns e matéria negra." />
+
+  <!-- FAVICON NA RAIZ -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <!-- CSS EM /assets -->
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="theme-neon">
+<div class="page">
+  <div class="top-row">
+    <div class="title-block">
+      <h1><span class="icon"></span> oGame AstroCalculator v2.0</h1>
+      <div class="subtitle">
+        Planeamento de astrofísica, abate de frota, destroços, produção, armazéns, trocas e matéria negra.
+      </div>
+    </div>
+    <div class="theme-switcher">
+      <label for="themeSelect">Tema</label>
+      <select id="themeSelect" class="theme-select" onchange="setTheme(this.value)">
+        <option value="neon">Neon</option>
+        <option value="carbon">Carbon</option>
+        <option value="light">Light</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- COLUNA ESQUERDA -->
+    <div class="left-col">
+
+      <!-- ASTROFÍSICA -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Astrofísica</div>
+          <div class="card-kicker">Custo por nível em metal, cristal e deutério</div>
+        </div>
+        <div class="card-section">
+          <div class="grid-4">
+            <div class="field">
+              <label for="astroLevel">Nível</label>
+              <input id="astroLevel" type="number" min="0"
+                     oninput="updateAstroCost(); markDirty();" />
+            </div>
+            <div class="field">
+              <label>Metal</label>
+              <input id="astroMetal" type="text" readonly />
+            </div>
+            <div class="field">
+              <label>Cristal</label>
+              <input id="astroCrystal" type="text" readonly />
+            </div>
+            <div class="field">
+              <label>Deutério</label>
+              <input id="astroDeut" type="text" readonly />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECURSOS & PRODUÇÃO -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recursos &amp; produção</div>
+        </div>
+        <div class="card-section">
+          <div class="card-kicker">Recursos atuais</div>
+          <div class="grid-3">
+            <div class="field">
+              <label for="curMetal">Metal atual</label>
+              <input id="curMetal" type="text"
+                     oninput="maskWithSpaces(this); markDirty(); updateStorages();" />
+            </div>
+            <div class="field">
+              <label for="curCrystal">Cristal atual</label>
+              <input id="curCrystal" type="text"
+                     oninput="maskWithSpaces(this); markDirty(); updateStorage
