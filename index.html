@@ -80,4 +80,278 @@
             <div class="field">
               <label for="curCrystal">Cristal atual</label>
               <input id="curCrystal" type="text"
-                     oninput="maskWithSpaces(this); markDirty(); updateStorage
+                     oninput="maskWithSpaces(this); markDirty(); updateStorages();" />
+            </div>
+            <div class="field">
+              <label for="curDeut">Deutério atual</label>
+              <input id="curDeut" type="text"
+                     oninput="maskWithSpaces(this); markDirty(); updateStorages();" />
+            </div>
+          </div>
+
+          <div class="card-kicker" style="margin-top:6px;">Produção diária</div>
+          <div class="grid-3">
+            <div class="field">
+              <label for="prodMetal">Produção metal/dia</label>
+              <input id="prodMetal" type="text"
+                     oninput="maskWithSpaces(this); markDirty();" />
+            </div>
+            <div class="field">
+              <label for="prodCrystal">Produção cristal/dia</label>
+              <input id="prodCrystal" type="text"
+                     oninput="maskWithSpaces(this); markDirty();" />
+            </div>
+            <div class="field">
+              <label for="prodDeut">Produção deutério/dia</label>
+              <input id="prodDeut" type="text"
+                     oninput="maskWithSpaces(this); markDirty();" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ARMAZÉNS & CONFIG -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Armazéns &amp; Configuração</div>
+        </div>
+        <div class="card-section">
+
+          <div class="card-kicker">Nível e capacidade dos armazéns</div>
+          <div class="grid-3">
+            <div class="field">
+              <label for="storLvlM">Armazém de Metal</label>
+              <input id="storLvlM" type="number" min="0"
+                     oninput="updateStorages(); markDirty();" />
+              <input id="storCapM" type="text" readonly />
+            </div>
+            <div class="field">
+              <label for="storLvlC">Armazém de Cristal</label>
+              <input id="storLvlC" type="number" min="0"
+                     oninput="updateStorages(); markDirty();" />
+              <input id="storCapC" type="text" readonly />
+            </div>
+            <div class="field">
+              <label for="storLvlD">Tanque de Deutério</label>
+              <input id="storLvlD" type="number" min="0"
+                     oninput="updateStorages(); markDirty();" />
+              <input id="storCapD" type="text" readonly />
+            </div>
+          </div>
+
+          <div class="card-kicker" style="margin-top:6px;">Bónus & trocas</div>
+          <div class="grid-3">
+            <div class="field">
+              <label for="storBonus">% Bónus forma de vida (armazém)</label>
+              <input id="storBonus" type="number" min="0"
+                     oninput="updateStorages(); markDirty();" />
+            </div>
+            <div class="field">
+              <label for="allyClass">Classe da Aliança</label>
+              <select id="allyClass" onchange="updateStorages(); markDirty();">
+                <option value="warrior">Guerreiros</option>
+                <option value="merchant">Comerciantes</option>
+                <option value="researcher">Investigadores</option>
+              </select>
+            </div>
+            <div></div>
+          </div>
+
+          <div class="grid-3" style="margin-top:6px;">
+            <div class="field">
+              <label>Taxa de trocas (metal)</label>
+              <input id="rateM" type="text" value="3"
+                     oninput="clampRates(); markDirty();" />
+            </div>
+            <div class="field">
+              <label>Taxa de trocas (cristal)</label>
+              <input id="rateC" type="text" value="2"
+                     oninput="clampRates(); markDirty();" />
+            </div>
+            <div class="field">
+              <label>Taxa de trocas (deutério)</label>
+              <input id="rateD" type="text" value="1"
+                     oninput="clampRates(); markDirty();" />
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top:6px;">
+            <div class="field">
+              <label for="packDM">Matéria negra por pacote</label>
+              <input id="packDM" type="text"
+                     oninput="maskWithSpaces(this); markDirty();" />
+            </div>
+            <div class="field">
+              <label for="tradeDM">Matéria negra por troca</label>
+              <input id="tradeDM" type="text"
+                     oninput="maskWithSpaces(this); markDirty();" />
+            </div>
+          </div>
+
+          <div class="controls-row">
+            <button type="button" class="btn btn-secondary" onclick="resetAll()">Reset</button>
+            <button type="button" class="btn btn-primary" onclick="calcular()">Calcular</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FROTA PARA ABATE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Frota para abate / sucateiro</div>
+          <div class="card-kicker">Pontos perdidos e destroços gerados</div>
+        </div>
+        <div class="card-section">
+
+          <div class="grid-3">
+            <div class="field">
+              <label for="debrisRate">% de destroços</label>
+              <input id="debrisRate" type="number" min="0" max="100"
+                     class="input-small"
+                     oninput="onDebrisRateChange();" />
+            </div>
+          </div>
+
+          <div class="controls-row" style="justify-content:flex-start; margin-top:8px;">
+            <select id="shipSelect" style="max-width:260px;">
+              <option value="lf">Caça Ligeiro</option>
+              <option value="hf">Caça Pesado</option>
+              <option value="cr">Cruzador</option>
+              <option value="bs">Nave de Batalha</option>
+              <option value="bc">Interceptor</option>
+              <option value="bom">Bombardeiro</option>
+              <option value="des">Destruidor</option>
+              <option value="rip">Estrela da Morte</option>
+              <option value="expo">Exploradora</option>
+              <option value="reap">Ceifeira</option>
+              <option value="sc">Cargueiro Pequeno</option>
+              <option value="lc">Cargueiro Grande</option>
+              <option value="col">Nave de Colonização</option>
+              <option value="rec">Reciclador</option>
+              <option value="spy">Sonda Espionagem</option>
+            </select>
+
+            <button type="button" class="btn btn-sm btn-primary" onclick="addShipRow()">Adicionar nave</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="clearFleet()">Limpar frota</button>
+          </div>
+
+          <div style="overflow-x:auto; margin-top:6px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nave</th>
+                  <th>Qtd</th>
+                  <th>Pontos perdidos</th>
+                  <th>Dest. Metal</th>
+                  <th>Dest. Cristal</th>
+                  <th>Dest. Deutério</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="fleetBody"></tbody>
+              <tfoot>
+                <tr>
+                  <td>Total</td>
+                  <td></td>
+                  <td class="narrow"><span id="sumPts"></span></td>
+                  <td class="narrow"><span id="sumDM"></span></td>
+                  <td class="narrow"><span id="sumDC"></span></td>
+                  <td class="narrow"><span id="sumDD"></span></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </div> <!-- left-col -->
+
+    <!-- COLUNA DIREITA -->
+    <div class="right-col">
+
+      <!-- KPIs -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Resumo rápido</div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi">
+            <div class="kpi-label">Metal em falta (taxa aplicada)</div>
+            <div class="kpi-value" id="kpiMissMSU">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Produção diária em MSU</div>
+            <div class="kpi-value" id="kpiProdMSU">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Dias estimados</div>
+            <div class="kpi-value" id="kpiDays">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpi-label">Pontos perdidos (frota)</div>
+            <div class="kpi-value" id="kpiPts">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESUMOS DETALHADOS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Detalhe da simulação</div>
+        </div>
+        <div class="card-section">
+
+          <div class="status-block">
+            <h3>Estado da astrofísica</h3>
+            <div id="statusAstro"></div>
+          </div>
+
+          <div class="status-block">
+            <h3>Destroços gerados</h3>
+            <div id="statusDebris"></div>
+          </div>
+
+          <div class="status-block">
+            <h3>Totais após recursos + frota</h3>
+            <div id="statusTotals"></div>
+          </div>
+
+          <div class="status-block">
+            <h3>Verificação de capacidade</h3>
+            <div id="statusCapacity"></div>
+          </div>
+
+          <div class="status-block">
+            <h3>Trocas recomendadas (MSU)</h3>
+            <div id="statusTrades"></div>
+          </div>
+
+          <div class="status-block">
+            <h3>Pacotes &amp; Matéria Negra</h3>
+            <div id="statusPacks"></div>
+          </div>
+
+          <div class="status-block">
+            <h3>Notas finais</h3>
+            <div id="statusNotes"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div> <!-- right-col -->
+  </div> <!-- layout -->
+
+  <div class="footer">
+    <span>oGame AstroCalculator v2.0 — Wezen @[MaRS] Cosmos.PT | Himalia.PT</span>
+  </div>
+
+</div> <!-- page -->
+
+<!-- JS EM /assets -->
+<script src="assets/script.js"></script>
+
+</body>
+</html>
