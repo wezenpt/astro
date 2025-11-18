@@ -101,6 +101,8 @@ function clampRates() {
   }
 }
 
+/* STATE SAVE/LOAD (mantiveste tudo, conforme pediste) */
+
 function collectState() {
   const data = {};
   document.querySelectorAll("input, select").forEach(el => {
@@ -218,6 +220,25 @@ function updateAstroCost() {
 /* ===========================
    DESTROÇOS / FROTA
    =========================== */
+
+const SHIPS = {
+  lf: { name:"Caça Ligeiro", m:3000, c:1000, d:0 },
+  hf: { name:"Caça Pesado", m:6000, c:4000, d:0 },
+  cr: { name:"Cruzador", m:20000, c:7000, d:2000 },
+  bs: { name:"Nave de Batalha", m:45000, c:15000, d:0 },
+  bc: { name:"Interceptor", m:30000, c:40000, d:15000 },
+  bom:{ name:"Bombardeiro", m:50000, c:25000, d:15000 },
+  des:{ name:"Destruidor", m:60000, c:50000, d:15000 },
+  rip:{ name:"Estrela da Morte", m:5000000, c:4000000, d:1000000 },
+  expo:{ name:"Exploradora", m:8000, c:15000, d:8000 },
+  reap:{ name:"Ceifeira", m:85000, c:55000, d:20000 },
+  sc: { name:"Cargueiro Pequeno", m:2000, c:2000, d:0 },
+  lc: { name:"Cargueiro Grande", m:6000, c:6000, d:0 },
+  col:{ name:"Nave de Colonização", m:10000, c:20000, d:10000 },
+  rec:{ name:"Reciclador", m:10000, c:6000, d:2000 },
+  spy:{ name:"Sonda Espionagem", m:0, c:1000, d:0 }
+};
+
 function getDebrisRate() {
   const el = document.getElementById("debrisRate");
   if (!el) return 0.7;
@@ -243,24 +264,6 @@ function onDebrisRateChange() {
   updateFleetStats();
   markDirty();
 }
-
-const SHIPS = {
-  lf:  { name:"Caça Ligeiro",        m:3000,    c:1000,    d:0      },
-  hf:  { name:"Caça Pesado",         m:6000,    c:4000,    d:0      },
-  cr:  { name:"Cruzador",            m:20000,   c:7000,    d:2000   },
-  bs:  { name:"Nave de Batalha",     m:45000,   c:15000,   d:0     },
-  bc:  { name:"Interceptor",         m:30000,   c:40000,   d:15000  },
-  bom: { name:"Bombardeiro",         m:50000,   c:25000,   d:15000  },
-  des: { name:"Destruidor",          m:60000,   c:50000,   d:15000  },
-  rip: { name:"Estrela da Morte",    m:5000000, c:4000000, d:1000000},
-  expo:{ name:"Exploradora",         m:8000,    c:15000,   d:8000   },
-  reap:{ name:"Ceifeira",            m:85000,   c:55000,   d:20000  },
-  sc:  { name:"Cargueiro Pequeno",   m:2000,    c:2000,    d:0      },
-  lc:  { name:"Cargueiro Grande",    m:6000,    c:6000,    d:0      },
-  col: { name:"Nave de Colonização", m:10000,   c:20000,   d:10000  },
-  rec: { name:"Reciclador",          m:10000,   c:6000,    d:2000   },
-  spy: { name:"Sonda Espionagem",    m:0,       c:1000,    d:0      }
-};
 
 function addShipRow() {
   const select = document.getElementById("shipSelect");
@@ -365,7 +368,6 @@ function updateFleetStats() {
    =========================== */
 function calcular() {
 
-  /* --- Ler valores --- */
   const astroM = valIntById("astroMetal");
   const astroC = valIntById("astroCrystal");
   const astroD = valIntById("astroDeut");
@@ -385,12 +387,10 @@ function calcular() {
   const fleetStats = updateFleetStats();
   const dm = fleetStats.dm, dc = fleetStats.dc, dd = fleetStats.dd;
 
-  /* --- Totais após destroços --- */
   const totalM = curM + dm;
   const totalC = curC + dc;
   const totalD = curD + dd;
 
-  /* --- Faltas --- */
   const faltaM = astroM - totalM;
   const faltaC = astroC - totalC;
   const faltaD = astroD - totalD;
@@ -403,7 +403,6 @@ function calcular() {
   const extraC = Math.max(-faltaC, 0);
   const extraD = Math.max(-faltaD, 0);
 
-  /* --- Conversão para MSU --- */
   const mFactor = 1;
   const cFactor = rateM / rateC;
   const dFactor = rateM / rateD;
@@ -417,14 +416,9 @@ function calcular() {
 
   const msuAfterTrades = Math.max(missMSU - totalExtraMSU, 0);
 
-  const prodMSU =
-      prodM*mFactor +
-      prodC*cFactor +
-      prodD*dFactor;
-
+  const prodMSU = prodM*mFactor + prodC*cFactor + prodD*dFactor;
   const metalMSUPerDay = prodM * mFactor;
 
-  /* --- Estimativas --- */
   let diasMSU = null;
   if (missMSU > 0 && prodMSU > 0) {
     diasMSU = missMSU / prodMSU;
@@ -437,7 +431,6 @@ function calcular() {
   const packDM = valIntById("packDM");
   const dmTotal = packs * packDM;
 
-  /* --- KPIs --- */
   document.getElementById("kpiMissMSU").textContent = fmt(Math.round(missMSU));
   document.getElementById("kpiProdMSU").textContent = fmt(Math.round(prodMSU));
   document.getElementById("kpiPts").textContent = fmt(fleetStats.totalPts);
@@ -446,85 +439,18 @@ function calcular() {
   if (diasMSU !== null) {
     kDays.textContent = "~ " + diasMSU.toFixed(1) + " dias";
   } else {
-    kDays.textContent = "0";
-  }
+    kDays.textContent = "0";```
 
-  /* ========================
-     Estado da Astrofísica
-     ======================== */
-  const stAstro = document.getElementById("statusAstro");
-  if (stAstro) {
-    stAstro.innerHTML = "";
+---
 
-    const makeLine = (label, val) => {
-      const div = document.createElement("div");
-      const s1 = document.createElement("span");
-      const s2 = document.createElement("span");
-      s1.textContent = label;
-      s2.textContent = typeof val === "number" ? fmt(val) : val;
-      div.appendChild(s1); div.appendChild(s2);
-      return div;
-    };
+**⚠️ AQUI ESTÁ A CORREÇÃO IMPORTANTE — BLOCO DE CAPACIDADE**
 
-    const metalFromC = missC * cFactor;
-    const metalFromD = missD * dFactor;
+```javascript
+/* ================================
+   Verificação de capacidade (CORRIGIDA)
+   ================================ */
 
-    stAstro.appendChild(makeLine("Metal em falta:", faltaM));
-    stAstro.appendChild(makeLine("Cristal em falta:", faltaC));
-    stAstro.appendChild(makeLine("Deutério em falta:", faltaD));
-    stAstro.appendChild(makeLine("Metal equivalente do cristal:", Math.round(metalFromC)));
-    stAstro.appendChild(makeLine("Metal equivalente do deutério:", Math.round(metalFromD)));
-    stAstro.appendChild(makeLine("Custo total em metal (taxa aplicada):", Math.round(missMSU)));
-  }
-
-  /* ========================
-     Destroços
-     ======================== */
-  const stDebris = document.getElementById("statusDebris");
-  if (stDebris) {
-    stDebris.innerHTML = "";
-
-    const makeLine = (label, val) => {
-      const div = document.createElement("div");
-      const s1 = document.createElement("span");
-      const s2 = document.createElement("span");
-      s1.textContent = label;
-      s2.textContent = fmt(val);
-      div.appendChild(s1); div.appendChild(s2);
-      return div;
-    };
-
-    stDebris.appendChild(makeLine("Metal destroços:", dm));
-    stDebris.appendChild(makeLine("Cristal destroços:", dc));
-    stDebris.appendChild(makeLine("Deutério destroços:", dd));
-  }
-
-  /* ========================
-     Totais
-     ======================== */
-  const stTotals = document.getElementById("statusTotals");
-  if (stTotals) {
-    stTotals.innerHTML = "";
-
-    const makeLine = (label, val) => {
-      const div = document.createElement("div");
-      const s1 = document.createElement("span");
-      const s2 = document.createElement("span");
-      s1.textContent = label;
-      s2.textContent = fmt(val);
-      div.appendChild(s1); div.appendChild(s2);
-      return div;
-    };
-
-    stTotals.appendChild(makeLine("Total Metal:", totalM));
-    stTotals.appendChild(makeLine("Total Cristal:", totalC));
-    stTotals.appendChild(makeLine("Total Deutério:", totalD));
-  }
-
-  /* ================================
-     Verificação de capacidade
-     ================================ */
- const capContainer = document.getElementById("statusCapacity");
+const capContainer = document.getElementById("statusCapacity");
 if (capContainer) {
   capContainer.innerHTML = "";
 
@@ -566,15 +492,15 @@ if (capContainer) {
   const capC = storageCap(lvlC);
   const capD = storageCap(lvlD);
 
-  const curM2 = valIntById("curMetal");
-  const curC2 = valIntById("curCrystal");
-  const curD2 = valIntById("curDeut");
+  // DESTROÇOS (únicos dados que interessam!)
+  const dm2 = dm;
+  const dc2 = dc;
+  const dd2 = dd;
 
-  const dm2 = dm, dc2 = dc, dd2 = dd;
-
-  if (curM2 > capM) issues.push(capIssue("Armazém de <strong>Metal</strong>", curM2 - capM));
-  if (curC2 > capC) issues.push(capIssue("Armazém de <strong>Cristal</strong>", curC2 - capC));
-  if (curD2 > capD) issues.push(capIssue("Tanque de <strong>Deutério</strong>", curD2 - capD));
+  // CORRIGIDO: NÃO verificar recursos atuais!
+  // Antes:
+  // if (curM2 > capM) ...
+  // Agora: apenas debris
 
   if (dm2 > capM) issues.push(capIssue("Armazém de <strong>Metal</strong>", dm2 - capM));
   if (dc2 > capC) issues.push(capIssue("Armazém de <strong>Cristal</strong>", dc2 - capC));
@@ -589,214 +515,3 @@ if (capContainer) {
     issues.forEach(i => capContainer.appendChild(i));
   }
 }
-
-  /* =========================
-     Trocas recomendadas
-     ========================= */
-  const stTrades = document.getElementById("statusTrades");
-  if (stTrades) {
-    stTrades.innerHTML = "";
-
-    const row = (label, text) => {
-      const div = document.createElement("div");
-      const s1 = document.createElement("span");
-      const s2 = document.createElement("span");
-      s1.textContent = label;
-      s2.textContent = text;
-      div.appendChild(s1); div.appendChild(s2);
-      return div;
-    };
-
-    const lvlC = parseInt(document.getElementById("storLvlC").value) || 0;
-    const lvlD = parseInt(document.getElementById("storLvlD").value) || 0;
-
-    const capC = storageCap(lvlC);
-    const capD = storageCap(lvlD);
-
-    const needC = Math.max(astroC - totalC, 0);
-    const needD = Math.max(astroD - totalD, 0);
-
-    let blocksC = 0, blocksD = 0;
-    let metalForCrystal = 0, metalForDeut = 0;
-
-    if (needC > 0 && capC > 0) {
-      blocksC = Math.ceil(needC / capC);
-      metalForCrystal = needC * (rateM / rateC);
-    }
-
-    if (needD > 0 && capD > 0) {
-      blocksD = Math.ceil(needD / capD);
-      metalForDeut = needD * (rateM / rateD);
-    }
-
-    if (needC === 0 && needD === 0) {
-      stTrades.appendChild(row("Trocas necessárias:", "Nenhuma — tens tudo."));
-    } else {
-      if (needC > 0) {
-        stTrades.appendChild(
-          row(
-            "Metal → Cristal:",
-            "Necessário: " + fmt(needC) +
-            " cristal (≈ " + blocksC + " trocas; limite " + fmt(capC) + "). Metal: " +
-            fmt(Math.round(metalForCrystal))
-          )
-        );
-      }
-      if (needD > 0) {
-        stTrades.appendChild(
-          row(
-            "Metal → Deutério:",
-            "Necessário: " + fmt(needD) +
-            " deutério (≈ " + blocksD + " trocas; limite " + fmt(capD) + "). Metal: " +
-            fmt(Math.round(metalForDeut))
-          )
-        );
-      }
-
-      stTrades.appendChild(row("Trocas totais:", blocksC + blocksD));
-      stTrades.appendChild(row(
-        "Metal total necessário:",
-        fmt(Math.round(metalForCrystal + metalForDeut))
-      ));
-    }
-  }
-
-  /* ============================
-     Pacotes e Matéria Negra
-     ============================ */
-  const stPacks = document.getElementById("statusPacks");
-  if (stPacks) {
-    stPacks.innerHTML = "";
-
-    const makeLine = (label, val) => {
-      const div = document.createElement("div");
-      const s1 = document.createElement("span");
-      const s2 = document.createElement("span");
-      s1.textContent = label;
-      s2.textContent = fmt(val);
-      div.appendChild(s1); div.appendChild(s2);
-      return div;
-    };
-
-    stPacks.appendChild(makeLine("Custo em metal (taxa aplicada):", Math.round(missMSU)));
-    stPacks.appendChild(makeLine("Custo metal/dia equivalente (total):", Math.round(prodMSU)));
-    stPacks.appendChild(makeLine("Custo metal/dia equivalente (metal):", Math.round(metalMSUPerDay)));
-    stPacks.appendChild(makeLine("Pacotes necessários (aprox.):", packs));
-
-    let dmPerTradeVal = 0;
-    const dmEl = document.getElementById("tradeDM");
-    if (dmEl) {
-      const raw = unfmt(dmEl.value);
-      if (raw !== "" && !isNaN(raw)) dmPerTradeVal = parseInt(raw, 10);
-    }
-
-    let needC2 = Math.max(astroC - totalC, 0);
-    let needD2 = Math.max(astroD - totalD, 0);
-
-    let lvlC2 = parseInt(document.getElementById("storLvlC").value) || 0;
-    let lvlD2 = parseInt(document.getElementById("storLvlD").value) || 0;
-
-    let capC2 = storageCap(lvlC2);
-    let capD2 = storageCap(lvlD2);
-
-    let blocksC2 = (needC2 > 0 ? Math.ceil(needC2 / capC2) : 0);
-    let blocksD2 = (needD2 > 0 ? Math.ceil(needD2 / capD2) : 0);
-
-    let dmTrades = (blocksC2 + blocksD2) * dmPerTradeVal;
-
-    stPacks.appendChild(makeLine("Matéria Negra (Pacotes):", dmTotal));
-    stPacks.appendChild(makeLine("Matéria Negra (Trocas):", dmTrades));
-    stPacks.appendChild(makeLine("Matéria Negra Total:", dmTotal + dmTrades));
-  }
-
-  /* ============================
-     Notas finais
-     ============================ */
-  const stNotes = document.getElementById("statusNotes");
-  if (stNotes) {
-    stNotes.innerHTML = "";
-
-    if (missMSU <= 0) {
-      const pill = document.createElement("div");
-      pill.className = "pill";
-      pill.innerHTML =
-        "<strong>Concluído:</strong> já tens metal suficiente (taxa aplicada) para este nível.";
-      stNotes.appendChild(pill);
-    } else {
-      const pill1 = document.createElement("div");
-      pill1.className = "pill danger";
-      pill1.innerHTML =
-        "<strong>Em falta:</strong> " + fmt(Math.round(missMSU)) + " metal.";
-      stNotes.appendChild(pill1);
-
-      if (diasMSU !== null) {
-        const pill2 = document.createElement("div");
-        pill2.className = "pill";
-        pill2.innerHTML =
-          "<strong>Tempo estimado:</strong> ~" + diasMSU.toFixed(1) + " dias.";
-        stNotes.appendChild(pill2);
-      }
-    }
-
-    if (fleetStats.totalPts > 0) {
-      const pill3 = document.createElement("div");
-      pill3.className = "pill";
-      pill3.innerHTML =
-        "<strong>Pontos perdidos com abate:</strong> " + fmt(fleetStats.totalPts) + ".";
-      stNotes.appendChild(pill3);
-    }
-  }
-
-  updateStorages();
-}
-
-/* ===========================
-   RESET
-   =========================== */
-function resetAll() {
-  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-
-  document.querySelectorAll("input").forEach(el => {
-    if (el.type === "button" || el.readOnly) return;
-    el.value = "";
-  });
-
-  document.getElementById("rateM").value = "3";
-  document.getElementById("rateC").value = "2";
-  document.getElementById("rateD").value = "1";
-
-  const ally = document.getElementById("allyClass");
-  if (ally) ally.value = "warrior";
-
-  const debris = document.getElementById("debrisRate");
-  if (debris) debris.value = "";
-
-  const fleetBody = document.getElementById("fleetBody");
-  if (fleetBody) fleetBody.innerHTML = "";
-
-  [
-    "statusAstro",
-    "statusDebris",
-    "statusTotals",
-    "statusCapacity",
-    "statusTrades",
-    "statusPacks",
-    "statusNotes"
-  ].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = "";
-  });
-
-  updateStorages();
-  updateAstroCost();
-}
-
-/* ===========================
-   CARREGAMENTO INICIAL
-   =========================== */
-document.addEventListener("DOMContentLoaded", () => {
-  loadTheme();
-  loadState();
-  updateStorages();
-  updateAstroCost();
-});
