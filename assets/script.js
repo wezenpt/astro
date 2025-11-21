@@ -264,9 +264,12 @@ function onDebrisRateChange() {
   if (v > 100) v = 100;
   el.value = v;
   el.classList.remove("warning");
+
+  resetConversionState();   // <-- NOVO
   updateFleetStats();
   markDirty();
 }
+
 
 const SHIPS = {
   lf: { name: "Caça Ligeiro", m: 3000, c: 1000, d: 0 },
@@ -301,7 +304,7 @@ function addShipRow() {
     <td class="fleet-input-cell">
       <div class="field">
         <input class="narrow" placeholder="Qtd"
-               oninput="maskWithSpaces(this); updateFleetStats(); markDirty()">
+               oninput="maskWithSpaces(this); resetConversionState(); updateFleetStats(); markDirty()">
       </div>
     </td>
     <td class="narrow colPts"></td>
@@ -314,26 +317,32 @@ function addShipRow() {
   `;
 
   tbody.appendChild(tr);
+  resetConversionState();   // <-- NOVO
   updateFleetStats();
   markDirty();
   toggleDebrisSection();
 }
+
 
 function removeShipRow(btn) {
   const tr = btn.closest("tr");
   if (tr) tr.remove();
+  resetConversionState();   // <-- NOVO
   updateFleetStats();
   markDirty();
   toggleDebrisSection();
 }
 
+
 function clearFleet() {
   const body = document.getElementById("fleetBody");
   if (body) body.innerHTML = "";
+  resetConversionState();   // <-- NOVO
   updateFleetStats();
   markDirty();
   toggleDebrisSection();
 }
+
 
 function updateFleetStats() {
   const tbody = document.getElementById("fleetBody");
@@ -487,9 +496,7 @@ function applyConversion() {
 
   calcular();
 }
-
-/* Botão "Limpar conversão" */
-function clearConversion() {
+function resetConversionState() {
   manualConversionActive = false;
   manualConversionFrom = "none";
   manualConversionTo = "none";
@@ -511,9 +518,14 @@ function clearConversion() {
       'Escolhe "de" e "para" e clica "Converter". ' +
       'Podes repetir o processo várias vezes com outras combinações.';
   }
+}
 
+/* Botão "Limpar conversão" */
+function clearConversion() {
+  resetConversionState();
   calcular();
 }
+
 
 /* ===========================
    CÁLCULO PRINCIPAL
