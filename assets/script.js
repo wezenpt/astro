@@ -19,13 +19,13 @@ function applyTheme(theme) {
 }
 
 function setTheme(theme) {
-  try { localStorage.setItem(THEME_KEY, theme); } catch(e){}
+  try { localStorage.setItem(THEME_KEY, theme); } catch (e) { }
   applyTheme(theme);
 }
 
 function loadTheme() {
   let t = "neon";
-  try { t = localStorage.getItem(THEME_KEY) || "neon"; } catch(e){}
+  try { t = localStorage.getItem(THEME_KEY) || "neon"; } catch (e) { }
   applyTheme(t);
 }
 
@@ -115,7 +115,7 @@ function saveState() {
   try {
     const data = collectState();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function loadState() {
@@ -127,7 +127,7 @@ function loadState() {
       const el = document.getElementById(id);
       if (el && typeof data[id] === "string") el.value = data[id];
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function markDirty() {
@@ -191,29 +191,53 @@ function updateStorages() {
    ASTROFÍSICA
    =========================== */
 function updateAstroCost() {
-  const lvl = parseInt(document.getElementById("astroLevel").value) || 0;
   const mField = document.getElementById("astroMetal");
   const cField = document.getElementById("astroCrystal");
   const dField = document.getElementById("astroDeut");
+  if (!mField || !cField || !dField) return;
 
-  if (lvl <= 0) {
+  const baseM = 4000, baseC = 8000, baseD = 4000, mult = 1.75;
+
+  const fromEl = document.getElementById("astroLevelFrom");
+  const toEl   = document.getElementById("astroLevelTo");
+
+  const from = fromEl ? (parseInt(fromEl.value, 10) || 0) : 0;
+  const to   = toEl   ? (parseInt(toEl.value, 10)   || 0) : 0;
+
+  // Se não houver nível final válido, limpa os campos
+  if (to <= 0) {
     mField.value = cField.value = dField.value = "";
     return;
   }
 
-  const baseM = 4000, baseC = 8000, baseD = 4000, mult = 1.75;
-  const factor = Math.pow(mult, lvl - 1);
+  let totalM = 0;
+  let totalC = 0;
+  let totalD = 0;
 
-  const m = Math.round(baseM * factor);
-  const c = Math.round(baseC * factor);
-  const d = Math.round(baseD * factor);
+  if (from > 0 && from < to) {
+    // Soma dos custos dos níveis (from+1 ... to)
+    for (let lvl = from + 1; lvl <= to; lvl++) {
+      const factor = Math.pow(mult, lvl - 1);
+      totalM += Math.round(baseM * factor);
+      totalC += Math.round(baseC * factor);
+      totalD += Math.round(baseD * factor);
+    }
+  } else {
+    // Sem nível inicial válido → custo apenas do nível "to" (comportamento simples)
+    const factor = Math.pow(mult, to - 1);
+    totalM = Math.round(baseM * factor);
+    totalC = Math.round(baseC * factor);
+    totalD = Math.round(baseD * factor);
+  }
 
-  mField.value = fmt(m);
-  cField.value = fmt(c);
-  dField.value = fmt(d);
+  mField.value = fmt(totalM);
+  cField.value = fmt(totalC);
+  dField.value = fmt(totalD);
 
   markDirty();
 }
+
+
 
 /* ===========================
    DESTROÇOS / FROTA
@@ -245,21 +269,21 @@ function onDebrisRateChange() {
 }
 
 const SHIPS = {
-  lf:  { name:"Caça Ligeiro",        m:3000,    c:1000,    d:0      },
-  hf:  { name:"Caça Pesado",         m:6000,    c:4000,    d:0      },
-  cr:  { name:"Cruzador",            m:20000,   c:7000,    d:2000   },
-  bs:  { name:"Nave de Batalha",     m:45000,   c:15000,   d:0      },
-  bc:  { name:"Interceptor",         m:30000,   c:40000,   d:15000  },
-  bom: { name:"Bombardeiro",         m:50000,   c:25000,   d:15000  },
-  des: { name:"Destruidor",          m:60000,   c:50000,   d:15000  },
-  rip: { name:"Estrela da Morte",    m:5000000, c:4000000, d:1000000},
-  expo:{ name:"Exploradora",         m:8000,    c:15000,   d:8000   },
-  reap:{ name:"Ceifeira",            m:85000,   c:55000,   d:20000  },
-  sc:  { name:"Cargueiro Pequeno",   m:2000,    c:2000,    d:0      },
-  lc:  { name:"Cargueiro Grande",    m:6000,    c:6000,    d:0      },
-  col: { name:"Nave de Colonização", m:10000,   c:20000,   d:10000  },
-  rec: { name:"Reciclador",          m:10000,   c:6000,    d:2000   },
-  spy: { name:"Sonda Espionagem",    m:0,       c:1000,    d:0      }
+  lf: { name: "Caça Ligeiro", m: 3000, c: 1000, d: 0 },
+  hf: { name: "Caça Pesado", m: 6000, c: 4000, d: 0 },
+  cr: { name: "Cruzador", m: 20000, c: 7000, d: 2000 },
+  bs: { name: "Nave de Batalha", m: 45000, c: 15000, d: 0 },
+  bc: { name: "Interceptor", m: 30000, c: 40000, d: 15000 },
+  bom: { name: "Bombardeiro", m: 50000, c: 25000, d: 15000 },
+  des: { name: "Destruidor", m: 60000, c: 50000, d: 15000 },
+  rip: { name: "Estrela da Morte", m: 5000000, c: 4000000, d: 1000000 },
+  expo: { name: "Exploradora", m: 8000, c: 15000, d: 8000 },
+  reap: { name: "Ceifeira", m: 85000, c: 55000, d: 20000 },
+  sc: { name: "Cargueiro Pequeno", m: 2000, c: 2000, d: 0 },
+  lc: { name: "Cargueiro Grande", m: 6000, c: 6000, d: 0 },
+  col: { name: "Nave de Colonização", m: 10000, c: 20000, d: 10000 },
+  rec: { name: "Reciclador", m: 10000, c: 6000, d: 2000 },
+  spy: { name: "Sonda Espionagem", m: 0, c: 1000, d: 0 }
 };
 
 function addShipRow() {
@@ -292,6 +316,7 @@ function addShipRow() {
   tbody.appendChild(tr);
   updateFleetStats();
   markDirty();
+  toggleDebrisSection();
 }
 
 function removeShipRow(btn) {
@@ -299,17 +324,20 @@ function removeShipRow(btn) {
   if (tr) tr.remove();
   updateFleetStats();
   markDirty();
+  toggleDebrisSection();
 }
 
 function clearFleet() {
-  document.getElementById("fleetBody").innerHTML = "";
+  const body = document.getElementById("fleetBody");
+  if (body) body.innerHTML = "";
   updateFleetStats();
   markDirty();
+  toggleDebrisSection();
 }
 
 function updateFleetStats() {
   const tbody = document.getElementById("fleetBody");
-  const rows = Array.from(tbody.querySelectorAll("tr"));
+  const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
   const debrisRate = getDebrisRate();
 
   let sumPts = 0, sumDM = 0, sumDC = 0, sumDD = 0;
@@ -324,40 +352,167 @@ function updateFleetStats() {
     const qty = qtyRaw === "" || isNaN(qtyRaw) ? 0 : parseInt(qtyRaw, 10);
 
     const ptsCell = tr.querySelector(".colPts");
-    const dmCell  = tr.querySelector(".colDM");
-    const dcCell  = tr.querySelector(".colDC");
-    const ddCell  = tr.querySelector(".colDD");
+    const dmCell = tr.querySelector(".colDM");
+    const dcCell = tr.querySelector(".colDC");
+    const ddCell = tr.querySelector(".colDD");
 
     if (qty <= 0) {
       ptsCell.textContent = dmCell.textContent =
-      dcCell.textContent = ddCell.textContent = "";
+        dcCell.textContent = ddCell.textContent = "";
       return;
     }
 
     const ptsPerUnit = (ship.m + ship.c + ship.d) / 1000;
     const pts = ptsPerUnit * qty;
 
-    const dm  = Math.floor(ship.m * qty * debrisRate);
-    const dc  = Math.floor(ship.c * qty * debrisRate);
-    const dd  = Math.floor(ship.d * qty * debrisRate);
+    const dm = Math.floor(ship.m * qty * debrisRate);
+    const dc = Math.floor(ship.c * qty * debrisRate);
+    const dd = Math.floor(ship.d * qty * debrisRate);
 
     ptsCell.textContent = fmt(Math.round(pts));
-    dmCell.textContent  = fmt(dm);
-    dcCell.textContent  = fmt(dc);
-    ddCell.textContent  = fmt(dd);
+    dmCell.textContent = fmt(dm);
+    dcCell.textContent = fmt(dc);
+    ddCell.textContent = fmt(dd);
 
     sumPts += pts;
-    sumDM  += dm;
-    sumDC  += dc;
-    sumDD  += dd;
+    sumDM += dm;
+    sumDC += dc;
+    sumDD += dd;
   });
 
-  document.getElementById("sumPts").textContent = sumPts ? fmt(Math.round(sumPts)) : "";
-  document.getElementById("sumDM").textContent  = sumDM  ? fmt(sumDM)  : "";
-  document.getElementById("sumDC").textContent  = sumDC  ? fmt(sumDC)  : "";
-  document.getElementById("sumDD").textContent  = sumDD  ? fmt(sumDD)  : "";
+  const sumPtsEl = document.getElementById("sumPts");
+  const sumDMEl = document.getElementById("sumDM");
+  const sumDCEl = document.getElementById("sumDC");
+  const sumDDEl = document.getElementById("sumDD");
+
+  if (sumPtsEl) sumPtsEl.textContent = sumPts ? fmt(Math.round(sumPts)) : "";
+  if (sumDMEl) sumDMEl.textContent = sumDM ? fmt(sumDM) : "";
+  if (sumDCEl) sumDCEl.textContent = sumDC ? fmt(sumDC) : "";
+  if (sumDDEl) sumDDEl.textContent = sumDD ? fmt(sumDD) : "";
 
   return { totalPts: Math.round(sumPts), dm: sumDM, dc: sumDC, dd: sumDD };
+}
+
+/* Mostrar/ocultar bloco de destroços */
+function toggleDebrisSection() {
+  const block = document.querySelector('#statusDebris')?.closest('.status-block');
+  if (!block) return;
+  const hasFleet = document.querySelectorAll('#fleetBody tr').length > 0;
+  block.style.display = hasFleet ? 'flex' : 'none';
+}
+
+/* ===========================
+   CONVERSÃO MANUAL (estado global)
+   =========================== */
+let manualConversionActive = false;
+let manualConversionFrom = "none";
+let manualConversionTo = "none";
+let manualConversionCount = 0;
+
+// Estado acumulado das conversões (totais após conversões)
+let convStateActive = false;
+let convTotalM = 0;
+let convTotalC = 0;
+let convTotalD = 0;
+
+const RESOURCE_NAMES = {
+  metal: "metal",
+  crystal: "cristal",
+  deut: "deutério"
+};
+
+function updateConvertFromOptions(extraM, extraC, extraD, selected) {
+  const cf = document.getElementById("convertFrom");
+  if (!cf) return;
+
+  const options = [{ label: "Nenhum", value: "none" }];
+  if (extraM > 0) options.push({ label: "Metal", value: "metal" });
+  if (extraC > 0) options.push({ label: "Cristal", value: "crystal" });
+  if (extraD > 0) options.push({ label: "Deutério", value: "deut" });
+
+  const prev = selected || cf.value || "none";
+
+  cf.innerHTML = "";
+  options.forEach(o => cf.add(new Option(o.label, o.value)));
+
+  if (options.some(o => o.value === prev)) cf.value = prev;
+  else cf.value = "none";
+}
+
+function updateConvertToOptions(missM, missC, missD, selected) {
+  const ct = document.getElementById("convertTo");
+  if (!ct) return;
+
+  const options = [{ label: "Nenhum", value: "none" }];
+  if (missM > 0) options.push({ label: "Metal", value: "metal" });
+  if (missC > 0) options.push({ label: "Cristal", value: "crystal" });
+  if (missD > 0) options.push({ label: "Deutério", value: "deut" });
+
+  const prev = selected || ct.value || "none";
+
+  ct.innerHTML = "";
+  options.forEach(o => ct.add(new Option(o.label, o.value)));
+
+  if (options.some(o => o.value === prev)) ct.value = prev;
+  else ct.value = "none";
+}
+
+/* Botão "Converter" */
+function applyConversion() {
+  const convBlock = document.querySelector("[data-convert-block]");
+  if (!convBlock || convBlock.style.display === "none") {
+    const sumEl = document.getElementById("convertSummary");
+    if (sumEl) sumEl.textContent = "Sem recursos em excesso para converter.";
+    manualConversionActive = false;
+    return;
+  }
+
+  const cf = document.getElementById("convertFrom");
+  const ct = document.getElementById("convertTo");
+  if (!cf || !ct) return;
+
+  const from = cf.value;
+  const to = ct.value;
+
+  if (from === "none" || to === "none" || from === to) {
+    manualConversionActive = false;
+    const sumEl = document.getElementById("convertSummary");
+    if (sumEl) sumEl.textContent = "Seleciona um recurso excedente e um recurso em falta.";
+    return;
+  }
+
+  manualConversionFrom = from;
+  manualConversionTo = to;
+  manualConversionActive = true;
+
+  calcular();
+}
+
+/* Botão "Limpar conversão" */
+function clearConversion() {
+  manualConversionActive = false;
+  manualConversionFrom = "none";
+  manualConversionTo = "none";
+  manualConversionCount = 0;
+
+  convStateActive = false;
+  convTotalM = 0;
+  convTotalC = 0;
+  convTotalD = 0;
+
+  const cf = document.getElementById("convertFrom");
+  const ct = document.getElementById("convertTo");
+  if (cf) cf.value = "none";
+  if (ct) ct.value = "none";
+
+  const sumEl = document.getElementById("convertSummary");
+  if (sumEl) {
+    sumEl.textContent =
+      'Escolhe "de" e "para" e clica "Converter". ' +
+      'Podes repetir o processo várias vezes com outras combinações.';
+  }
+
+  calcular();
 }
 
 /* ===========================
@@ -365,88 +520,266 @@ function updateFleetStats() {
    =========================== */
 function calcular() {
 
-  /* --- Ler valores --- */
+  /* --- Ler valores base (inputs nunca são alterados) --- */
   const astroM = valIntById("astroMetal");
   const astroC = valIntById("astroCrystal");
   const astroD = valIntById("astroDeut");
 
-  const curM = valIntById("curMetal");
-  const curC = valIntById("curCrystal");
-  const curD = valIntById("curDeut");
+  const curM_input = valIntById("curMetal");
+  const curC_input = valIntById("curCrystal");
+  const curD_input = valIntById("curDeut");
 
   const prodM = valIntById("prodMetal");
   const prodC = valIntById("prodCrystal");
   const prodD = valIntById("prodDeut");
 
-  const rateM = Math.min(3, valFloatById("rateM",3));
-  const rateC = Math.min(2, valFloatById("rateC",2));
-  const rateD = Math.min(1, valFloatById("rateD",1));
+  const rateM = Math.min(3, valFloatById("rateM", 3));
+  const rateC = Math.min(2, valFloatById("rateC", 2));
+  const rateD = Math.min(1, valFloatById("rateD", 1));
 
   const fleetStats = updateFleetStats();
   const dm = fleetStats.dm, dc = fleetStats.dc, dd = fleetStats.dd;
 
-  /* --- Totais após destroços --- */
-  const totalM = curM + dm;
-  const totalC = curC + dc;
-  const totalD = curD + dd;
+  toggleDebrisSection();
 
-  /* --- Faltas --- */
-  const faltaM = astroM - totalM;
-  const faltaC = astroC - totalC;
-  const faltaD = astroD - totalD;
+  /* --- Totais "base" sem conversões --- */
+  const baseTotalM = curM_input + dm;
+  const baseTotalC = curC_input + dc;
+  const baseTotalD = curD_input + dd;
 
-  const missM = Math.max(faltaM, 0);
-  const missC = Math.max(faltaC, 0);
-  const missD = Math.max(faltaD, 0);
+  /* --- Estado inicial para esta execução (pode já ter conversões acumuladas) --- */
+  let totalM_start, totalC_start, totalD_start;
 
-  const extraM = Math.max(-faltaM, 0);
-  const extraC = Math.max(-faltaC, 0);
-  const extraD = Math.max(-faltaD, 0);
+  if (convStateActive) {
+    // Já houve conversões antes: continuar a partir do estado convertido
+    totalM_start = convTotalM;
+    totalC_start = convTotalC;
+    totalD_start = convTotalD;
+  } else {
+    // Sem conversões: usar diretamente stocks + destroços
+    totalM_start = baseTotalM;
+    totalC_start = baseTotalC;
+    totalD_start = baseTotalD;
+  }
 
-  /* --- Conversão para MSU --- */
+  /* --- Faltas/excedentes antes desta conversão --- */
+  let faltaM_before = astroM - totalM_start;
+  let faltaC_before = astroC - totalC_start;
+  let faltaD_before = astroD - totalD_start;
+
+  let missM_before = Math.max(faltaM_before, 0);
+  let missC_before = Math.max(faltaC_before, 0);
+  let missD_before = Math.max(faltaD_before, 0);
+
+  let extraM_before = Math.max(totalM_start - astroM, 0);
+  let extraC_before = Math.max(totalC_start - astroC, 0);
+  let extraD_before = Math.max(totalD_start - astroD, 0);
+
+  /* --- Conversão para MSU (antes das conversões desta execução) --- */
   const mFactor = 1;
   const cFactor = rateM / rateC;
   const dFactor = rateM / rateD;
 
-  const missMSU = missM*mFactor + missC*cFactor + missD*dFactor;
+  const missMSU_before =
+    missM_before * mFactor +
+    missC_before * cFactor +
+    missD_before * dFactor;
 
-  const msuFromM = extraM*mFactor;
-  const msuFromC = extraC*cFactor;
-  const msuFromD = extraD*dFactor;
-  const totalExtraMSU = msuFromM + msuFromC + msuFromD;
+  /* --- Mostrar/ocultar bloco de conversão + dropdowns --- */
+  const convBlock = document.querySelector("[data-convert-block]");
+  if (convBlock) {
+    if (extraM_before > 0 || extraC_before > 0 || extraD_before > 0) {
+      convBlock.style.display = "block";
 
-  const msuAfterTrades = Math.max(missMSU - totalExtraMSU, 0);
+      const cfEl = document.getElementById("convertFrom");
+      const ctEl = document.getElementById("convertTo");
+
+      const currentFrom = manualConversionActive ? manualConversionFrom : (cfEl ? cfEl.value : "none");
+      const currentTo = manualConversionActive ? manualConversionTo : (ctEl ? ctEl.value : "none");
+
+      updateConvertFromOptions(extraM_before, extraC_before, extraD_before, currentFrom);
+      updateConvertToOptions(missM_before, missC_before, missD_before, currentTo);
+
+      const sumEl = document.getElementById("convertSummary");
+      if (sumEl && !manualConversionActive && manualConversionCount === 0) {
+        sumEl.textContent = 'Escolha as opções acima e clique "Converter".';
+      }
+
+    } else {
+      convBlock.style.display = "none";
+
+      const cf = document.getElementById("convertFrom");
+      const ct = document.getElementById("convertTo");
+      if (cf) cf.value = "none";
+      if (ct) ct.value = "none";
+
+      manualConversionActive = false;
+      manualConversionFrom = "none";
+      manualConversionTo = "none";
+      manualConversionCount = 0;
+
+      const sumEl = document.getElementById("convertSummary");
+      if (sumEl) sumEl.textContent = "Sem recursos em excesso para converter.";
+    }
+  }
+
+  /* ===========================
+     Aplicar (eventual) conversão desta execução
+     =========================== */
+
+  // Totais de trabalho (serão a base para tudo o resto)
+  let totalM_work = totalM_start;
+  let totalC_work = totalC_start;
+  let totalD_work = totalD_start;
+
+  // miss/excess "reais" (serão atualizados se houver conversão)
+  let missM_real = missM_before;
+  let missC_real = missC_before;
+  let missD_real = missD_before;
+  let extraM_real = extraM_before;
+  let extraC_real = extraC_before;
+  let extraD_real = extraD_before;
+
+  function convertExcess(from, to) {
+    if (from === "none" || to === "none" || from === to) return false;
+
+    // Excedentes e faltas com base nos totais atuais
+    const extraMap = {
+      metal: Math.max(totalM_work - astroM, 0),
+      crystal: Math.max(totalC_work - astroC, 0),
+      deut: Math.max(totalD_work - astroD, 0)
+    };
+    const needMap = {
+      metal: Math.max(astroM - totalM_work, 0),
+      crystal: Math.max(astroC - totalC_work, 0),
+      deut: Math.max(astroD - totalD_work, 0)
+    };
+
+    const excessUnits = extraMap[from];
+    const needUnits = needMap[to];
+
+    if (excessUnits <= 0 || needUnits <= 0) {
+      const sumEl = document.getElementById("convertSummary");
+      if (sumEl) {
+        sumEl.textContent = "Não há excedentes ou faltas suficientes para converter.";
+      }
+      return false;
+    }
+
+    const rate = {
+      metal: 1,
+      crystal: rateM / rateC,
+      deut: rateM / rateD
+    };
+
+    const excessMSU = excessUnits * rate[from];
+    const needMSU = needUnits * rate[to];
+    const usedMSU = Math.min(excessMSU, needMSU);
+    if (usedMSU <= 0) return false;
+
+    const usedFrom = usedMSU / rate[from];
+    const gainedTo = usedMSU / rate[to];
+
+    // Atualizar totais "virtuais" (não mexe nos inputs!)
+    if (from === "metal") totalM_work -= usedFrom;
+    if (from === "crystal") totalC_work -= usedFrom;
+    if (from === "deut") totalD_work -= usedFrom;
+
+    if (to === "metal") totalM_work += gainedTo;
+    if (to === "crystal") totalC_work += gainedTo;
+    if (to === "deut") totalD_work += gainedTo;
+
+    // Nunca deixar negativos (só por segurança de arredondamentos)
+    totalM_work = Math.max(totalM_work, 0);
+    totalC_work = Math.max(totalC_work, 0);
+    totalD_work = Math.max(totalD_work, 0);
+
+    // Recalcular faltas/excedentes após a conversão
+    missM_real = Math.max(astroM - totalM_work, 0);
+    missC_real = Math.max(astroC - totalC_work, 0);
+    missD_real = Math.max(astroD - totalD_work, 0);
+
+    extraM_real = Math.max(totalM_work - astroM, 0);
+    extraC_real = Math.max(totalC_work - astroC, 0);
+    extraD_real = Math.max(totalD_work - astroD, 0);
+
+    const leftoverFrom = {
+      metal: extraM_real,
+      crystal: extraC_real,
+      deut: extraD_real
+    }[from];
+
+    const sumEl = document.getElementById("convertSummary");
+    if (sumEl) {
+      let msg =
+        `Convertido ${fmt(Math.round(usedFrom))} de ${RESOURCE_NAMES[from]} ` +
+        `em ${fmt(Math.round(gainedTo))} ${RESOURCE_NAMES[to]}.`;
+
+      if (leftoverFrom > 0) {
+        msg += `<br>Ainda tens ${fmt(Math.round(leftoverFrom))} de ${RESOURCE_NAMES[from]} em excesso que podes usar numa nova conversão.`;
+      }
+
+      sumEl.innerHTML = msg;
+    }
+
+    manualConversionCount++;
+    return true;
+  }
+
+  if (manualConversionActive &&
+    manualConversionFrom !== "none" &&
+    manualConversionTo !== "none" &&
+    manualConversionFrom !== manualConversionTo) {
+    const didConvert = convertExcess(manualConversionFrom, manualConversionTo);
+    if (didConvert) {
+      convStateActive = true;
+      convTotalM = totalM_work;
+      convTotalC = totalC_work;
+      convTotalD = totalD_work;
+    }
+  }
+
+  // Depois desta execução, já não queremos repetir conversão automaticamente
+  manualConversionActive = false;
+
+  /* --- Estado final após possíveis conversões desta execução --- */
+  const missMSU_final =
+    missM_real * mFactor +
+    missC_real * cFactor +
+    missD_real * dFactor;
 
   const prodMSU =
-      prodM*mFactor +
-      prodC*cFactor +
-      prodD*dFactor;
+    prodM * mFactor +
+    prodC * cFactor +
+    prodD * dFactor;
 
   const metalMSUPerDay = prodM * mFactor;
 
-  /* --- Estimativas --- */
+  /* --- Estimativas de tempo --- */
   let diasMSU = null;
-  if (missMSU > 0 && prodMSU > 0) {
-    diasMSU = missMSU / prodMSU;
+  if (missMSU_final > 0 && prodMSU > 0) {
+    diasMSU = missMSU_final / prodMSU;
   }
 
   let packs = 0;
-  if (missMSU > 0 && metalMSUPerDay > 0) {
-    packs = Math.ceil(missMSU / metalMSUPerDay);
+  if (missMSU_final > 0 && metalMSUPerDay > 0) {
+    packs = Math.ceil(missMSU_final / metalMSUPerDay);
   }
   const packDM = valIntById("packDM");
   const dmTotal = packs * packDM;
 
-  /* --- KPIs --- */
-  document.getElementById("kpiMissMSU").textContent = fmt(Math.round(missMSU));
-  document.getElementById("kpiProdMSU").textContent = fmt(Math.round(prodMSU));
-  document.getElementById("kpiPts").textContent = fmt(fleetStats.totalPts);
-
+  /* --- KPIs (topo) --- */
+  const kMiss = document.getElementById("kpiMissMSU");
+  const kProd = document.getElementById("kpiProdMSU");
+  const kPts = document.getElementById("kpiPts");
   const kDays = document.getElementById("kpiDays");
-  if (diasMSU !== null) {
-    kDays.textContent = "~ " + diasMSU.toFixed(1) + " dias";
-  } else {
-    kDays.textContent = "0";
+
+  if (kMiss) kMiss.textContent = fmt(Math.round(missMSU_final));
+  if (kProd) kProd.textContent = fmt(Math.round(prodMSU));
+  if (kPts) kPts.textContent = fmt(fleetStats.totalPts);
+  if (kDays) {
+    if (diasMSU !== null) kDays.textContent = "~ " + diasMSU.toFixed(1) + " dias";
+    else kDays.textContent = "0";
   }
 
   /* ========================
@@ -456,7 +789,7 @@ function calcular() {
   if (stAstro) {
     stAstro.innerHTML = "";
 
-    const makeLine = (label, val) => {
+    const makeLineAstro = (label, val) => {
       const div = document.createElement("div");
       const s1 = document.createElement("span");
       const s2 = document.createElement("span");
@@ -466,15 +799,40 @@ function calcular() {
       return div;
     };
 
-    const metalFromC = missC * cFactor;
-    const metalFromD = missD * dFactor;
+    function appendNeedExcess(nome, falta, excesso) {
+      const row = document.createElement("div");
+      row.classList.add("astro-line");
+      const s1 = document.createElement("span");
+      const s2 = document.createElement("span");
 
-    stAstro.appendChild(makeLine("Metal em falta:", faltaM));
-    stAstro.appendChild(makeLine("Cristal em falta:", faltaC));
-    stAstro.appendChild(makeLine("Deutério em falta:", faltaD));
-    stAstro.appendChild(makeLine("Metal equivalente do cristal:", Math.round(metalFromC)));
-    stAstro.appendChild(makeLine("Metal equivalente do deutério:", Math.round(metalFromD)));
-    stAstro.appendChild(makeLine("Custo total em metal (taxa aplicada):", Math.round(missMSU)));
+      if (falta > 0) {
+        row.classList.add("astro-missing");
+        s1.textContent = nome + " em falta:";
+        s2.textContent = fmt(falta);
+      } else if (excesso > 0) {
+        row.classList.add("astro-excess");
+        s1.textContent = nome + " em excesso:";
+        s2.textContent = fmt(excesso);
+      } else {
+        s1.textContent = nome + ":";
+        s2.textContent = "OK";
+      }
+
+      row.appendChild(s1);
+      row.appendChild(s2);
+      stAstro.appendChild(row);
+    }
+
+    appendNeedExcess("Metal", missM_real, extraM_real);
+    appendNeedExcess("Cristal", missC_real, extraC_real);
+    appendNeedExcess("Deutério", missD_real, extraD_real);
+
+    const metalFromC = missC_real * cFactor;
+    const metalFromD = missD_real * dFactor;
+
+    stAstro.appendChild(makeLineAstro("Metal equivalente do cristal:", Math.round(metalFromC)));
+    stAstro.appendChild(makeLineAstro("Metal equivalente do deutério:", Math.round(metalFromD)));
+    stAstro.appendChild(makeLineAstro("Custo total em metal (taxa aplicada):", Math.round(missMSU_final)));
   }
 
   /* ========================
@@ -484,7 +842,7 @@ function calcular() {
   if (stDebris) {
     stDebris.innerHTML = "";
 
-    const makeLine = (label, val) => {
+    const makeLineDebris = (label, val) => {
       const div = document.createElement("div");
       const s1 = document.createElement("span");
       const s2 = document.createElement("span");
@@ -494,9 +852,9 @@ function calcular() {
       return div;
     };
 
-    stDebris.appendChild(makeLine("Metal destroços:", dm));
-    stDebris.appendChild(makeLine("Cristal destroços:", dc));
-    stDebris.appendChild(makeLine("Deutério destroços:", dd));
+    stDebris.appendChild(makeLineDebris("Metal destroços:", dm));
+    stDebris.appendChild(makeLineDebris("Cristal destroços:", dc));
+    stDebris.appendChild(makeLineDebris("Deutério destroços:", dd));
   }
 
   /* ========================
@@ -504,9 +862,25 @@ function calcular() {
      ======================== */
   const stTotals = document.getElementById("statusTotals");
   if (stTotals) {
+    const titleEl = stTotals.previousElementSibling;
+    if (titleEl && titleEl.tagName === "H3") {
+      const hasStock = (baseTotalM > 0 || baseTotalC > 0 || baseTotalD > 0);
+      const hasDebris = (dm > 0 || dc > 0 || dd > 0);
+
+      if (hasStock && hasDebris) {
+        titleEl.textContent = "Totais após recursos + destroços gerados";
+      } else if (hasStock && !hasDebris) {
+        titleEl.textContent = "Total de recursos";
+      } else if (!hasStock && hasDebris) {
+        titleEl.textContent = "Total de recursos + Destroços Gerados";
+      } else {
+        titleEl.textContent = "Total de recursos";
+      }
+    }
+
     stTotals.innerHTML = "";
 
-    const makeLine = (label, val) => {
+    const makeLineTotals = (label, val) => {
       const div = document.createElement("div");
       const s1 = document.createElement("span");
       const s2 = document.createElement("span");
@@ -516,13 +890,13 @@ function calcular() {
       return div;
     };
 
-    stTotals.appendChild(makeLine("Total Metal:", totalM));
-    stTotals.appendChild(makeLine("Total Cristal:", totalC));
-    stTotals.appendChild(makeLine("Total Deutério:", totalD));
+    stTotals.appendChild(makeLineTotals("Total Metal:", totalM_work));
+    stTotals.appendChild(makeLineTotals("Total Cristal:", totalC_work));
+    stTotals.appendChild(makeLineTotals("Total Deutério:", totalD_work));
   }
 
   /* ================================
-     Verificação de capacidade (CORRIGIDA)
+     Verificação de capacidade
      ================================ */
   const capContainer = document.getElementById("statusCapacity");
   if (capContainer) {
@@ -558,15 +932,14 @@ function calcular() {
       return row;
     }
 
-    const lvlM = parseInt(document.getElementById("storLvlM").value) || 0;
-    const lvlC = parseInt(document.getElementById("storLvlC").value) || 0;
-    const lvlD = parseInt(document.getElementById("storLvlD").value) || 0;
+    const lvlM2 = parseInt(document.getElementById("storLvlM").value) || 0;
+    const lvlC2 = parseInt(document.getElementById("storLvlC").value) || 0;
+    const lvlD2 = parseInt(document.getElementById("storLvlD").value) || 0;
 
-    const capM = storageCap(lvlM);
-    const capC = storageCap(lvlC);
-    const capD = storageCap(lvlD);
+    const capM = storageCap(lvlM2);
+    const capC = storageCap(lvlC2);
+    const capD = storageCap(lvlD2);
 
-    // Só considerar destroços para a verificação de capacidade
     const dm2 = dm, dc2 = dc, dd2 = dd;
 
     if (dm2 > capM) issues.push(capIssue("Armazém de <strong>Metal</strong>", dm2 - capM));
@@ -600,57 +973,116 @@ function calcular() {
       return div;
     };
 
-    const lvlC = parseInt(document.getElementById("storLvlC").value) || 0;
-    const lvlD = parseInt(document.getElementById("storLvlD").value) || 0;
+    const lvlM3 = parseInt(document.getElementById("storLvlM").value) || 0;
+    const lvlC3 = parseInt(document.getElementById("storLvlC").value) || 0;
+    const lvlD3 = parseInt(document.getElementById("storLvlD").value) || 0;
 
-    const capC = storageCap(lvlC);
-    const capD = storageCap(lvlD);
+    const caps = {
+      metal: storageCap(lvlM3),
+      crystal: storageCap(lvlC3),
+      deut: storageCap(lvlD3)
+    };
 
-    const needC = Math.max(astroC - totalC, 0);
-    const needD = Math.max(astroD - totalD, 0);
+    const needs = {
+      metal: Math.max(missM_real, 0),
+      crystal: Math.max(missC_real, 0),
+      deut: Math.max(missD_real, 0)
+    };
 
-    let blocksC = 0, blocksD = 0;
-    let metalForCrystal = 0, metalForDeut = 0;
+    const extras = {
+      metal: extraM_real,
+      crystal: extraC_real,
+      deut: extraD_real
+    };
 
-    if (needC > 0 && capC > 0) {
-      blocksC = Math.ceil(needC / capC);
-      metalForCrystal = needC * (rateM / rateC);
-    }
+    const rate2 = {
+      metal: 1,
+      crystal: rateM / rateC,
+      deut: rateM / rateD
+    };
 
-    if (needD > 0 && capD > 0) {
-      blocksD = Math.ceil(needD / capD);
-      metalForDeut = needD * (rateM / rateD);
-    }
+    const hasExcess =
+      extras.metal > 0 || extras.crystal > 0 || extras.deut > 0;
 
-    if (needC === 0 && needD === 0) {
+    if (needs.metal === 0 && needs.crystal === 0 && needs.deut === 0) {
       stTrades.appendChild(row("Trocas necessárias:", "Nenhuma — tens tudo."));
+    } else if (!hasExcess && needs.crystal === 0 && needs.deut === 0) {
+      stTrades.appendChild(
+        row(
+          "Trocas necessárias:",
+          "Nenhuma troca possível — apenas falta metal (cobre com produção/pacotes)."
+        )
+      );
     } else {
-      if (needC > 0) {
-        stTrades.appendChild(
-          row(
-            "Metal → Cristal:",
-            "Necessário: " + fmt(needC) +
-            " cristal (≈ " + blocksC + " trocas; limite " + fmt(capC) + "). Metal: " +
-            fmt(Math.round(metalForCrystal))
-          )
-        );
-      }
-      if (needD > 0) {
-        stTrades.appendChild(
-          row(
-            "Metal → Deutério:",
-            "Necessário: " + fmt(needD) +
-            " deutério (≈ " + blocksD + " trocas; limite " + fmt(capD) + "). Metal: " +
-            fmt(Math.round(metalForDeut))
-          )
-        );
+      let fromKey = "metal";
+      if (hasExcess) {
+        let maxExtraMSU = -Infinity;
+        ["metal", "crystal", "deut"].forEach(k => {
+          const e = extras[k];
+          if (e > 0) {
+            const msu = e * rate2[k];
+            if (msu > maxExtraMSU) {
+              maxExtraMSU = msu;
+              fromKey = k;
+            }
+          }
+        });
       }
 
-      stTrades.appendChild(row("Trocas totais:", blocksC + blocksD));
-      stTrades.appendChild(row(
-        "Metal total necessário:",
-        fmt(Math.round(metalForCrystal + metalForDeut))
-      ));
+      const fromName = RESOURCE_NAMES[fromKey];
+      const fromNameCap = fromName.charAt(0).toUpperCase() + fromName.slice(1);
+
+      let totalBlocks = 0;
+      let totalFromNeeded = 0;
+      let linesCount = 0;
+
+      ["metal", "crystal", "deut"].forEach(destKey => {
+        const need = needs[destKey];
+        if (need <= 0) return;
+        if (destKey === fromKey) return;
+
+        const capDest = caps[destKey] || 0;
+        const blocks = capDest > 0 ? Math.ceil(need / capDest) : 0;
+
+        const needMSU = need * rate2[destKey];
+        const fromAmount = needMSU / rate2[fromKey];
+
+        totalBlocks += blocks;
+        totalFromNeeded += fromAmount;
+        linesCount++;
+
+        const destName = RESOURCE_NAMES[destKey];
+        const destNameCap = destName.charAt(0).toUpperCase() + destName.slice(1);
+
+        stTrades.appendChild(
+          row(
+            `${fromNameCap} → ${destNameCap}:`,
+            "Necessário: " + fmt(need) +
+            " " + destName +
+            (capDest > 0
+              ? " (≈ " + blocks + " trocas; limite " + fmt(capDest) + "). "
+              : ". ") +
+            fromNameCap + ": " + fmt(Math.round(fromAmount))
+          )
+        );
+      });
+
+      if (linesCount === 0) {
+        stTrades.appendChild(
+          row(
+            "Trocas necessárias:",
+            "Nenhuma troca direta recomendada — a maior parte da falta é no mesmo recurso que usarias para trocar."
+          )
+        );
+      } else {
+        stTrades.appendChild(row("Trocas totais:", totalBlocks));
+        stTrades.appendChild(
+          row(
+            `${fromNameCap} total necessário:`,
+            fmt(Math.round(totalFromNeeded))
+          )
+        );
+      }
     }
   }
 
@@ -661,7 +1093,7 @@ function calcular() {
   if (stPacks) {
     stPacks.innerHTML = "";
 
-    const makeLine = (label, val) => {
+    const makeLinePacks = (label, val) => {
       const div = document.createElement("div");
       const s1 = document.createElement("span");
       const s2 = document.createElement("span");
@@ -671,10 +1103,25 @@ function calcular() {
       return div;
     };
 
-    stPacks.appendChild(makeLine("Custo em metal (taxa aplicada):", Math.round(missMSU)));
-    stPacks.appendChild(makeLine("Custo metal/dia equivalente (total):", Math.round(prodMSU)));
-    stPacks.appendChild(makeLine("Custo metal/dia equivalente (metal):", Math.round(metalMSUPerDay)));
-    stPacks.appendChild(makeLine("Pacotes necessários (aprox.):", packs));
+    const faltaDepois = Math.max(missMSU_final, 0);
+
+    stPacks.appendChild(makeLinePacks(
+      "Custo em metal (taxa aplicada):",
+      Math.round(faltaDepois)
+    ));
+    stPacks.appendChild(makeLinePacks(
+      "Custo metal/dia equivalente (total):",
+      Math.round(prodMSU)
+    ));
+    stPacks.appendChild(makeLinePacks(
+      "Custo metal/dia equivalente (metal):",
+      Math.round(metalMSUPerDay)
+    ));
+
+    const packsUsados = (faltaDepois > 0) ? packs : 0;
+    const dmPacotes = packsUsados * packDM;
+    stPacks.appendChild(makeLinePacks("Pacotes necessários (aprox.):", packsUsados));
+    stPacks.appendChild(makeLinePacks("Matéria Negra (Pacotes):", dmPacotes));
 
     let dmPerTradeVal = 0;
     const dmEl = document.getElementById("tradeDM");
@@ -683,8 +1130,8 @@ function calcular() {
       if (raw !== "" && !isNaN(raw)) dmPerTradeVal = parseInt(raw, 10);
     }
 
-    let needC2 = Math.max(astroC - totalC, 0);
-    let needD2 = Math.max(astroD - totalD, 0);
+    let needC2 = Math.max(missC_real, 0);
+    let needD2 = Math.max(missD_real, 0);
 
     let lvlC2 = parseInt(document.getElementById("storLvlC").value) || 0;
     let lvlD2 = parseInt(document.getElementById("storLvlD").value) || 0;
@@ -695,11 +1142,14 @@ function calcular() {
     let blocksC2 = (needC2 > 0 ? Math.ceil(needC2 / capC2) : 0);
     let blocksD2 = (needD2 > 0 ? Math.ceil(needD2 / capD2) : 0);
 
-    let dmTrades = (blocksC2 + blocksD2) * dmPerTradeVal;
+    const autoTrades = blocksC2 + blocksD2;
+    const manualTrades = manualConversionCount;
+    const totalTrades = autoTrades + manualTrades;
 
-    stPacks.appendChild(makeLine("Matéria Negra (Pacotes):", dmTotal));
-    stPacks.appendChild(makeLine("Matéria Negra (Trocas):", dmTrades));
-    stPacks.appendChild(makeLine("Matéria Negra Total:", dmTotal + dmTrades));
+    const dmTrades = totalTrades * dmPerTradeVal;
+
+    stPacks.appendChild(makeLinePacks("Matéria Negra (Trocas):", dmTrades));
+    stPacks.appendChild(makeLinePacks("Matéria Negra Total:", dmPacotes + dmTrades));
   }
 
   /* ============================
@@ -709,17 +1159,26 @@ function calcular() {
   if (stNotes) {
     stNotes.innerHTML = "";
 
-    if (missMSU <= 0) {
+    if (missMSU_final <= 0) {
       const pill = document.createElement("div");
       pill.className = "pill";
-      pill.innerHTML =
-        "<strong>Concluído:</strong> já tens metal suficiente (taxa aplicada) para este nível.";
+
+      if (missMSU_before > 0) {
+        pill.innerHTML =
+          "<strong>Concluído:</strong> com as conversões de excedentes " +
+          "consegues obter todos os recursos que faltavam para este nível, " +
+          "sem precisares de produção extra nem pacotes.";
+      } else {
+        pill.innerHTML =
+          "<strong>Concluído:</strong> já tens metal suficiente (taxa aplicada) para este nível.";
+      }
+
       stNotes.appendChild(pill);
     } else {
       const pill1 = document.createElement("div");
       pill1.className = "pill danger";
       pill1.innerHTML =
-        "<strong>Em falta:</strong> " + fmt(Math.round(missMSU)) + " metal.";
+        "<strong>Em falta:</strong> " + fmt(Math.round(missMSU_final)) + " metal.";
       stNotes.appendChild(pill1);
 
       if (diasMSU !== null) {
@@ -744,19 +1203,22 @@ function calcular() {
 }
 
 /* ===========================
-   RESET
+   RESET TOTAL
    =========================== */
 function resetAll() {
-  try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  try { localStorage.removeItem(STORAGE_KEY); } catch (e) { }
 
   document.querySelectorAll("input").forEach(el => {
     if (el.type === "button" || el.readOnly) return;
     el.value = "";
   });
 
-  document.getElementById("rateM").value = "3";
-  document.getElementById("rateC").value = "2";
-  document.getElementById("rateD").value = "1";
+  const rM = document.getElementById("rateM");
+  const rC = document.getElementById("rateC");
+  const rD = document.getElementById("rateD");
+  if (rM) rM.value = "3";
+  if (rC) rC.value = "2";
+  if (rD) rD.value = "1";
 
   const ally = document.getElementById("allyClass");
   if (ally) ally.value = "warrior";
@@ -780,8 +1242,31 @@ function resetAll() {
     if (el) el.innerHTML = "";
   });
 
+  manualConversionActive = false;
+  manualConversionFrom = "none";
+  manualConversionTo = "none";
+  manualConversionCount = 0;
+
+  convStateActive = false;
+  convTotalM = 0;
+  convTotalC = 0;
+  convTotalD = 0;
+
+  const cf = document.getElementById("convertFrom");
+  const ct = document.getElementById("convertTo");
+  if (cf) cf.value = "none";
+  if (ct) ct.value = "none";
+
+  const sumEl = document.getElementById("convertSummary");
+  if (sumEl) {
+    sumEl.textContent =
+      'Escolhe "de" e "para" e clica "Converter". ' +
+      'Podes repetir o processo várias vezes com outras combinações.';
+  }
+
   updateStorages();
   updateAstroCost();
+  toggleDebrisSection();
 }
 
 /* ===========================
@@ -792,4 +1277,5 @@ document.addEventListener("DOMContentLoaded", () => {
   loadState();
   updateStorages();
   updateAstroCost();
+  toggleDebrisSection();
 });

@@ -77,7 +77,9 @@ body.theme-light .pill.danger {
   color: #8e0000;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -186,6 +188,7 @@ input[readonly] {
   body {
     padding: 12px;
   }
+
   .layout {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -278,6 +281,25 @@ select {
   gap: 8px;
   margin-top: 4px;
 }
+
+/* Botões nas linhas de controlo: mesma largura e altura */
+.controls-row .btn,
+.controls-row .btn-sm {
+  flex: 0 0 140px;
+  /* largura idêntica para todos */
+  display: flex;
+  align-items: center;
+  /* centra verticalmente o texto */
+  justify-content: center;
+  /* centra horizontalmente */
+  min-height: 30px;
+  /* mesma altura mínima */
+  text-align: center;
+  padding: 8px 16px;
+  /* podes afinar se quiseres mais altos/baixos */
+}
+
+
 
 .btn {
   border-radius: 999px;
@@ -420,7 +442,7 @@ body.theme-light .status-block {
   color: var(--muted);
 }
 
-.status-block > div > div {
+.status-block>div>div {
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -498,4 +520,26 @@ body.theme-light .status-block {
 
 .theme-light .cap-value {
   color: #1c1c1e;
+}
+
+
+/* Estado da Astrofísica: faltas vs excedentes */
+.astro-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.astro-line span:first-child {
+  color: var(--muted);
+}
+
+.astro-line.astro-missing span:last-child {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.astro-line.astro-excess span:last-child {
+  color: var(--accent);
+  font-weight: 600;
 }
