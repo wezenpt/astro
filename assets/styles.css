@@ -543,3 +543,103 @@ body.theme-light .status-block {
   color: var(--accent);
   font-weight: 600;
 }
+
+/* ----------------------------
+   Mobile refinements
+   ---------------------------- */
+
+/* Tablets / telemóveis em landscape */
+@media (max-width: 720px) {
+  body {
+    padding: 10px;
+  }
+
+  .page {
+    max-width: 100%;
+  }
+
+  .top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .theme-switcher {
+    align-self: flex-start;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+}
+
+/* Telemóveis "normais" */
+@media (max-width: 600px) {
+
+  /* Grelhas passam a 1 coluna para não apertar inputs */
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* KPIs um por linha para melhor leitura */
+  .kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Botões em linha de controlo passam a ocupar largura total */
+  .controls-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls-row .btn,
+  .controls-row .btn-sm {
+    flex: 1 0 auto;
+    width: 100%;
+  }
+
+  /* Inputs da frota ocupam a largura disponível */
+  .fleet-input-cell input {
+    width: 100%;
+  }
+
+  /* Tabelas com scroll horizontal em vez de encolher tudo */
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  thead,
+  tbody,
+  tfoot,
+  tr,
+  th,
+  td {
+    white-space: nowrap;
+  }
+
+  /* Cartões um bocadinho mais compactos */
+  .card {
+    padding: 12px 12px 14px;
+  }
+}
+
+/* Telemóveis muito pequenos (tipo 320px) */
+@media (max-width: 400px) {
+  h1 {
+    font-size: 18px;
+    letter-spacing: 0.06em;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .theme-switcher {
+    font-size: 11px;
+  }
+}
